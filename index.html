@@ -1,45 +1,99 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dřevěné výrobky - ruční práce</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
-      text-align: center;
-      padding: 40px;
-    }
-    h1 {
-      color: #5a3825;
-    }
-    .product {
-      background: white;
-      margin: 20px auto;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 400px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-  </style>
-</head>
-<body>
-  <h1>Ruční dřevěné výrobky</h1>
-  <p>Vítejte na mém webu! Nabízím ručně vyráběné misky, prkénka, obrázky a další drobnosti ze dřeva.</p>
-  
-  <div class="product">
-    <h2>Dřevěná miska</h2>
-    <p>Každá miska je originál, ručně soustružená z kvalitního dřeva.</p>
-  </div>
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import Navigation from './components/Navigation';
+import Hero from './components/Hero';
+import Categories from './components/Categories';
+import AboutSection from './components/AboutSection';
+import { products, categories } from './mock/mockData';
+import { Card, CardContent } from './components/ui/card';
 
-  <div class="product">
-    <h2>Kuchyňské prkénko</h2>
-    <p>Praktické a krásné prkénko z dubového dřeva.</p>
-  </div>
 
-  <p>Kontakt: <strong>info@mojedrevo.cz</strong></p>
-</body>
-</html>
+// Helper to read query params
+const useQuery = () => {
+return new URLSearchParams(useLocation().search);
+};
 
+
+const HomePage = () => {
+return (
+<>
+<Hero />
+<Categories />
+<AboutSection />
+</>
+);
+};
+
+
+const ProductsPage = () => {
+const query = useQuery();
+const categorySlug = query.get('category');
+const filteredProducts = categorySlug
+? products.filter((p) => p.category === categorySlug)
+: products;
+
+
+const categoryName = categorySlug
+? categories.find((c) => c.slug === categorySlug)?.name || 'Produkty'
+: 'Všechny Produkty';
+
+
+return (
+<section className="py-20 px-6 bg-white min-h-screen">
+<div className="container mx-auto max-w-6xl">
+<h2 className="text-4xl md:text-5xl font-serif text-gray-900 mb-12 text-center">
+{categoryName}
+</h2>
+
+
+{filteredProducts.length > 0 ? (
+<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+{filteredProducts.map((product) => (
+<Card key={product.id} className="overflow-hidden shadow-lg hover:shadow-2xl transition-all">
+<div className="h-64 w-full overflow-hidden">
+<img
+src={product.image}
+alt={product.name}
+className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+/>
+</div>
+<CardContent className="p-6">
+<h3 className="text-xl font-semibold mb-2 text-gray-900">{product.name}</h3>
+<p className="text-gray-600 mb-3">{product.description}</p>
+<p className="text-[#a08660] font-bold text-lg">{product.price} Kč</p>
+</CardContent>
+</Card>
+))}
+</div>
+) : (
+<p className="text-center text-gray-600 text-lg">Žádné produkty nebyly nalezeny.</p>
+)}
+</div>
+</section>
+);
+};
+
+
+const App = () => {
+return (
+<Router>
+<div className="font-sans bg-white text-gray-900">
+<Navigation />
+<Routes>
+<Route path="/" element={<HomePage />} />
+<Route path="/products" element={<ProductsPage />} />
+</Routes>
+<footer className="bg-black text-white py-10 mt-20">
+<div className="container mx-auto px-6 text-center">
+<p className="text-sm text-white/70">
+© {new Date().getFullYear()} DŘEVOŘEMESLO — Všechna práva vyhrazena.
+</p>
+</div>
+</footer>
+</div>
+</Router>
+);
+};
+
+
+export default App;
